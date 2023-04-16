@@ -4,91 +4,75 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using CsvHelper;
-using CsvHelper.Configuration;
 
 namespace FirstBankOfSuncoast
 {
     class Program
     {
-        static void Debug(string item)
-        {
-            Console.WriteLine($"Debug {item}");
-            Console.WriteLine("Press any key to continue...");
-            Console.ReadKey(true).Key.ToString();
-        }
 
-        static void WelcomeMessage()
-        {
-            Console.Clear();
-            Console.WriteLine("--------------------");
-            Console.WriteLine("Welcome to your bank");
-            Console.WriteLine("--------------------");
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("Press any key to continue...");
-            Console.ReadKey(true).Key.ToString();
-            // Console.Clear();
-        }
-
-        static void Menu(string file, List<Transaction> list)
+        public static void Menu(string file, List<Transaction> list)
         {
             bool usingMenu = true;
             while (usingMenu)
             {
                 var menuInput = PromptForChar("What would you like to do? \n(B)alance"); // \n(T)ransactions \n(D)eposit \n(W)ithdrawal \n(Q) to quit.");
 
-                var newTransaction = new Transaction();
-                var listOfTransactions = new List<Transaction>();
+                var n = list.Select(x => x.Savings);
+                PrintListOfTransactions(n);
+
+                // var newTransaction = new Transaction();
+                // var listOfTransactions = new List<Transaction>();
 
                 switch (menuInput)
                 {
                     // BALANCE
-                    case "B":
-                        menuInput = PromptForChar("What account would you like to see a balance for? \n(S)avings \n(C)hecking");
-                        switch (menuInput)
-                        {
-                            // SAVINGS
-                            case "S":
-                                // See list of transactions from Savings
-                                var n = listOfTransactions.Select(x => x.Savings);
-                                PrintListOfTransactions(n);
-                                DialogueRefresher();
-                                // ListTransactions(list.savings);
-                                break;
+                    // case "B":
 
-                            // CHECKING
-                            case "C":
-                                // See list of transactions from Checking
-                                n = listOfTransactions.Select(x => x.Checking);
-                                PrintListOfTransactions(n);
-                                DialogueRefresher();
-
-                                // ListTransactions(list.checking);
-                                break;
-                        }
-                        break;
-
-                    // use newTransaction 
-                    // // LIST OF TRANSACTIONS
-                    // case "T":
-                    //     menuInput = PromptForChar("What would you like to see? \n(S)avings \n(C)hecking");
+                    //     menuInput = PromptForChar("What account would you like to see a balance for? \n(S)avings \n(C)hecking");
                     //     switch (menuInput)
                     //     {
                     //         // SAVINGS
                     //         case "S":
                     //             // See list of transactions from Savings
-                    //             listOfTransactions.Select(x => x.Savings);
-                    //             PrintListOfTransactions(listOfTransactions);
+                    //             var n = listOfTransactions.Select(x => x.Savings);
+                    //             PrintListOfTransactions(n);
+                    //             DialogueRefresher();
                     //             // ListTransactions(list.savings);
                     //             break;
 
                     //         // CHECKING
                     //         case "C":
                     //             // See list of transactions from Checking
+                    //             n = listOfTransactions.Select(x => x.Checking);
+                    //             PrintListOfTransactions(n);
+                    //             DialogueRefresher();
+
                     //             // ListTransactions(list.checking);
                     //             break;
                     //     }
                     //     break;
+
+                    // use newTransaction 
+                    // LIST OF TRANSACTIONS
+                    case "T":
+                        menuInput = PromptForChar("What would you like to see? \n(S)avings \n(C)hecking");
+                        switch (menuInput)
+                        {
+                            // SAVINGS
+                            case "S":
+                                // See list of transactions from Savings
+                                // var n = list.Select(x => x.Savings);
+                                // PrintListOfTransactions(n);
+                                // ListTransactions(list.savings);
+                                break;
+
+                            // CHECKING
+                            case "C":
+                                // See list of transactions from Checking
+                                // ListTransactions(list.checking);
+                                break;
+                        }
+                        break;
 
                     // // DEPOSIT
                     // case "D":
@@ -155,59 +139,6 @@ namespace FirstBankOfSuncoast
             }
         }
 
-        static List<Transaction> LoadStatement(string file, List<Transaction> list)
-        {
-            //var list = new List<int>;
-            if (File.Exists(file))
-            {
-
-                // Create a file reader to read from statement.csv
-                var fileReader = new StreamReader(file);
-
-                // Create a configuration that indicates this CSV file has no header
-                var csvReader = new CsvReader(fileReader, CultureInfo.InvariantCulture);
-
-                // Creates our List<int> for from *READING* the data from the file!
-                list = csvReader.GetRecords<Transaction>().ToList();//(numbers);
-
-                fileReader.Close();
-            }
-            return list;
-        }
-
-        static void SaveStatement(string file, List<Transaction> obj)
-        {
-            var fileWriter = new StreamWriter(file);
-            var csvWriter = new CsvWriter(fileWriter, CultureInfo.InvariantCulture);
-            csvWriter.WriteRecords(obj);
-            fileWriter.Close();
-        }
-
-        static void PrintNumber()
-        {
-        }
-
-        static void PrintListOfTransactions(List<Transaction> list)
-        {
-            foreach (var item in list)
-            {
-                Console.WriteLine($"{item} is the object in this list");
-                DialogueRefresher();
-            }
-        }
-
-
-        // public void AddTransaction(Transaction newTransaction)
-        // {
-        //     // Transaction.Add(newTransaction);
-        // }
-
-        static int sumForBalance(List<Transaction> list, string option)
-        {
-            return list.Sum(x => x.Savings);
-            // PrintListOfTransactions(list.Sum(x => x.Savings);
-        }
-
         static int PromptForInt(string prompt)
         {
             var inputWasInteger = false;
@@ -254,15 +185,17 @@ namespace FirstBankOfSuncoast
             Console.ReadKey(true).Key.ToString();
             Console.Clear();
         }
-
-        static void Main(string[] args)
-        {
-            string filename = "statement.csv";
-            var statements = new List<Transaction>();
-            WelcomeMessage();
-            LoadStatement(filename, statements);
-            Menu(filename, statements);
-            SaveStatement(filename, statements);
-        }
     }
+
+    static void Main(string[] args)
+    {
+        string filename = "statement.csv";
+        var statements = new List<Transaction>();
+        var db = new TransactionsDatabase();
+        db.WelcomeMessage();
+        db.LoadStatement(filename, statements);
+        db.Menu(filename, statements);
+        db.SaveStatement(filename, statements);
+    }
+}
 }
