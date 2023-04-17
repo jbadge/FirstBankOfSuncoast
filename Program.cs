@@ -9,136 +9,122 @@ namespace FirstBankOfSuncoast
 {
     class Program
     {
+        // HOW DOES RIGHT CLICK "ADD CLASS" WORK in VSCODE?
+        public static void WelcomeMessage()
+        {
+            Console.Clear();
+            Console.WriteLine("--------------------");
+            Console.WriteLine("Welcome to your bank");
+            Console.WriteLine("--------------------");
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey(true).Key.ToString();
+            // Console.Clear();
+        }
 
-        public static void Menu(string file, List<Transaction> list)
+        public static void Menu(TransactionDatabase database)  // (string file, List<Transaction> list)
         {
             bool usingMenu = true;
             while (usingMenu)
             {
                 var menuInput = PromptForChar("What would you like to do? \n(B)alance"); // \n(T)ransactions \n(D)eposit \n(W)ithdrawal \n(Q) to quit.");
 
-                var n = list.Select(x => x.Savings);
-                PrintListOfTransactions(n);
+                // var n = database.Sum(x => x.Savings);
+                // PrintListOfTransactions(n);
 
                 // var newTransaction = new Transaction();
                 // var listOfTransactions = new List<Transaction>();
 
                 switch (menuInput)
                 {
-                    // BALANCE
-                    // case "B":
 
-                    //     menuInput = PromptForChar("What account would you like to see a balance for? \n(S)avings \n(C)hecking");
-                    //     switch (menuInput)
-                    //     {
-                    //         // SAVINGS
-                    //         case "S":
-                    //             // See list of transactions from Savings
-                    //             var n = listOfTransactions.Select(x => x.Savings);
-                    //             PrintListOfTransactions(n);
-                    //             DialogueRefresher();
-                    //             // ListTransactions(list.savings);
-                    //             break;
+                    case "Q":
+                        usingMenu = false;
+                        break;
 
-                    //         // CHECKING
-                    //         case "C":
-                    //             // See list of transactions from Checking
-                    //             n = listOfTransactions.Select(x => x.Checking);
-                    //             PrintListOfTransactions(n);
-                    //             DialogueRefresher();
+                    case "B":
 
-                    //             // ListTransactions(list.checking);
-                    //             break;
-                    //     }
-                    //     break;
+                        menuInput = PromptForChar("What account would you like to see a balance for? \n(S)avings \n(C)hecking");
 
-                    // use newTransaction 
-                    // LIST OF TRANSACTIONS
-                    case "T":
-                        menuInput = PromptForChar("What would you like to see? \n(S)avings \n(C)hecking");
                         switch (menuInput)
                         {
-                            // SAVINGS
                             case "S":
-                                // See list of transactions from Savings
-                                // var n = list.Select(x => x.Savings);
-                                // PrintListOfTransactions(n);
-                                // ListTransactions(list.savings);
+                                database.GetBalance("S");
                                 break;
-
-                            // CHECKING
                             case "C":
-                                // See list of transactions from Checking
-                                // ListTransactions(list.checking);
+                                database.GetBalance("C");
                                 break;
                         }
                         break;
 
-                    // // DEPOSIT
-                    // case "D":
-                    //     menuInput = PromptForChar("Where would you like to make a deposit? \n(S)avings \n(C)hecking");
+                    // SEE A LIST OF TRANSACTIONS
+                    // case "T":
+                    //     CheckingOrSavings();
                     //     switch (menuInput)
                     //     {
-                    //         // SAVINGS
                     //         case "S":
-                    //             // Make deposit transaction for Savings
-                    //             var number = PromptForInt("How much would you like to deposit into your savings account?");
-                    //             newTransaction.Savings = number;
-
-                    //             // Write all transactions to file
-                    //             SaveStatement(file, listOfTransactions);
-                    //             // GAVIN USED AN ADD METHOD. 
+                    //             database.PrintTransactions();
                     //             break;
-
-                    //         // CHECKING
                     //         case "C":
-                    //             // Make deposit transaction for checking
-                    //             number = PromptForInt("How much would you like to deposit into your checking account?");
-                    //             newTransaction.Checking = number;
-
-                    //             // Write all transactions to file
-                    //             SaveStatement(file, listOfTransactions);
+                    //             database.PrintTransactions();
                     //             break;
                     //     }
                     //     break;
 
-                    // // WITHDRAWAL
-                    // case "W":
-                    //     menuInput = PromptForChar("What account would you like to make a withdrawal from? \n(S)avings \n(C)hecking");
-                    //     switch (menuInput)
-                    //     {
-                    //         // SAVINGS
-                    //         case "S":
-                    //             // Make withdrawal transaction for savings
-                    //             var number = PromptForInt("How much would you like to withdraw from your savings account?");
-                    //             // Write all transactions to file
-                    //             break;
+                    // MAKE A DEPOSIT
+                    case "D":
+                        menuInput = PromptForChar("What account would you like to see a balance for? \n(S)avings \n(C)hecking");
+                        switch (menuInput)
+                        {
+                            // SAVINGS
+                            case "S":
+                                var number = PromptForInt("How much would you like to deposit into your savings account?");
+                                var newTransaction = new Transaction();
+                                newTransaction.Savings = number;
+                                database.Deposit(newTransaction);
+                                // GAVIN USED AN ADD METHOD. 
+                                break;
 
-                    //         // CHECKING
-                    //         case "C":
-                    //             // Make withdrawal transaction for checking
-                    //             number = PromptForInt("How much would you like to withdraw from your checking account?");
-                    //             // Write all transactions to file                                
-                    //             break;
-                    //     }
-                    //     break;
+                            // CHECKING
+                            case "C":
+                                number = PromptForInt("How much would you like to deposit into your checking account?");
+                                newTransaction = new Transaction();
+                                newTransaction.Checking = number;
+                                database.Withdraw(newTransaction);
+                                // SaveStatement(file, listOfTransactions);
+                                break;
+                        }
+                        break;
 
-                    // QUIT
-                    case "Q":
-                        usingMenu = false;
+                    // MAKE A WITHDRAWAL
+                    case "W":
+                        menuInput = PromptForChar("What account would you like to see a balance for? \n(S)avings \n(C)hecking");
+                        switch (menuInput)
+                        {
+                            // SAVINGS
+                            case "S":
+
+                                var number = PromptForInt("How much would you like to withdraw from your savings account?");
+                                // Write all transactions to file
+                                break;
+
+                            // CHECKING
+                            case "C":
+                                number = PromptForInt("How much would you like to withdraw from your checking account?");
+                                // Write all transactions to file                                
+                                break;
+                        }
                         break;
                     default:
                         Console.WriteLine("Please pick a valid option.");
-                        DialogueRefresher();
+                        database.DialogueRefresher();
                         break;
-
-                        // See the balance of savings and checking (together?)
-                        // See the balance of savings 
-                        // See the balance of checking
                 }
             }
         }
 
+        // DIALOGUE REFRESHER
         static int PromptForInt(string prompt)
         {
             var inputWasInteger = false;
@@ -156,7 +142,11 @@ namespace FirstBankOfSuncoast
                 else
                 {
                     Console.WriteLine("This is not a valid number. Please try again");
-                    DialogueRefresher();
+                    // DIALOGUE REFRESHER
+                    Console.WriteLine();
+                    Console.WriteLine("Press any key to continue...");
+                    Console.ReadKey(true).Key.ToString();
+                    Console.Clear();
                 }
             }
             return inputAsInteger;
@@ -178,24 +168,59 @@ namespace FirstBankOfSuncoast
             return userInput;
         }
 
-        static void DialogueRefresher()
+        static void Debug(int num)
         {
-            Console.WriteLine();
+            Console.WriteLine($"Debug {num}");
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey(true).Key.ToString();
-            Console.Clear();
+        }
+
+        static void Main(string[] args)
+        {
+            // Could prompt for a filename here
+            // string filename = "statement.csv";
+
+            // MOVE THE NEW LIST CREATION SOMEWHERE ELSE
+            var listOfTransactions = new List<Transaction>();
+            var database = new TransactionDatabase();
+            WelcomeMessage();
+            database.LoadTransactions();
+            Menu(database);
         }
     }
+}
 
-    static void Main(string[] args)
-    {
-        string filename = "statement.csv";
-        var statements = new List<Transaction>();
-        var db = new TransactionsDatabase();
-        db.WelcomeMessage();
-        db.LoadStatement(filename, statements);
-        db.Menu(filename, statements);
-        db.SaveStatement(filename, statements);
-    }
-}
-}
+
+// public static string CheckingOrSavings()
+// {
+//     var menuInput = PromptForChar("What account would you like to see a balance for? \n(S)avings \n(C)hecking");
+//     return menuInput;
+// }
+
+// //  public static string CheckingOrSavings()
+// //         {
+// //             var menuInput = PromptForChar("What account would you like to see a balance for? \n(S)avings \n(C)hecking");
+// //             switch (menuInput)
+// //             {
+// //                 case "S":
+// //                     database.GetBalance("S");
+// //                     break;
+// //                 case "C":
+// //                     database.GetBalance("C");
+// //                     break;
+// //             }
+// //             return menuInput;
+// //         }
+
+// CheckingOrSavings();
+//                 Console.WriteLine($"{menuInput}");
+//                 switch (menuInput)
+//                 {
+//                     case "S":
+//                         database.GetBalance("S");
+//                         break;
+//                     case "C":
+//                         database.GetBalance("C");
+//                         break;
+//                 }
+//                 break;
