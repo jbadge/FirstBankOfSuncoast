@@ -122,13 +122,6 @@ namespace FirstBankOfSuncoast
             return userInput;
         }
 
-        static void Debug(int num)
-        {
-            Console.WriteLine($"Debug {num}");
-            Console.WriteLine("Press any key to continue...");
-            Console.ReadKey(true).Key.ToString();
-        }
-
         // Main
         static void Main(string[] args)
         {

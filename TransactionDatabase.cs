@@ -27,6 +27,18 @@ namespace FirstBankOfSuncoast
                 listOfTransactions = csvReader.GetRecords<Transaction>().ToList();
                 fileReader.Close();
             }
+            // ###########################################################
+            // THIS IS CURRENTLY NEEDED TO WORK WHEN A FILE DOES NOT EXIST, 
+            // BECAUSE OF THE LINES IN DEPOSIT/WITHDRAWAL THAT MANIPULATE
+            // A LIST, SO WHEN ONE DOES NOT EXIST (WITH DATA),  IT FREAKS.
+            // THIS GIVES US HEADERS AND A FILE, and DEFAULT VALUES
+            // ###########################################################
+            else
+            {
+                Transaction initialization = new Transaction();
+                listOfTransactions.Add(initialization);
+                SaveTransactions();
+            }
         }
 
         public void SaveTransactions()
@@ -44,12 +56,12 @@ namespace FirstBankOfSuncoast
             {
                 case "S":
                     var balance = listOfTransactions.Last(x => x.Savings > 0).Savings;
-                    Console.WriteLine($"Your savings balance is ${balance}");
+                    Console.WriteLine($"Your savings balance is ${balance}.");
                     DialogueRefresher();
                     break;
                 case "C":
                     balance = listOfTransactions.Last(x => x.Checking > 0).Checking;
-                    Console.WriteLine($"Your checking balance is ${balance}");
+                    Console.WriteLine($"Your checking balance is ${balance}.");
                     DialogueRefresher();
                     break;
             }
@@ -61,11 +73,35 @@ namespace FirstBankOfSuncoast
             switch (menuInput)
             {
                 case "S":
-                    foreach (var item in listOfTransactions) { Console.WriteLine($"{item.Savings}"); }
+                    Console.WriteLine("Here are your transactions for your Savings account:");
+                    foreach (var item in listOfTransactions)
+                    {
+                        if (item.DepositToSavings > 0)
+                        {
+                            Console.WriteLine($" + ${item.DepositToSavings} Deposit");
+                        }
+                        else if (item.WithdrawalFromSavings > 0)
+                        {
+                            Console.WriteLine($" - ${item.WithdrawalFromSavings} Withdrawal");
+                        }
+                    }
+                    Console.WriteLine($"You savings account balance is ${listOfTransactions.Last(x => x.Savings > 0).Savings}.");
                     DialogueRefresher();
                     break;
+
                 case "C":
-                    foreach (var item in listOfTransactions) { Console.WriteLine($"{item.Checking}"); }
+                    foreach (var item in listOfTransactions)
+                    {
+                        if (item.DepositToChecking > 0)
+                        {
+                            Console.WriteLine($" + ${item.DepositToChecking} Deposit");
+                        }
+                        else if (item.WithdrawalFromChecking > 0)
+                        {
+                            Console.WriteLine($" - ${item.WithdrawalFromChecking} Withdrawal");
+                        }
+                    }
+                    Console.WriteLine($"You checking account balance is ${listOfTransactions.Last(x => x.Checking > 0).Checking}.");
                     DialogueRefresher();
                     break;
             }
@@ -82,21 +118,31 @@ namespace FirstBankOfSuncoast
             switch (menuInput)
             {
                 case "S":
-                    var savings = listOfTransactions.Last(x => x.Savings > 0);
+
+                    // #################################################
+                    // THIS BREAKS THINGS IF THE FILE DOES NOT EXIST!!!!
+
+
+                    // NEEDS TO DO A CHECK/ INIT with ZERO
+                    var savings = listOfTransactions.Last(x => x.Savings > 0).Savings;
+                    // var savings = listOfTransactions.Last(x => x.Savings >= 0).Savings;
                     var number = CheckValueIsPos("deposit into your savings account?");
 
-                    transactionToDeposit.Deposit = number;
-                    transactionToDeposit.Savings = savings.Savings + number;
+                    transactionToDeposit.DepositToSavings = number;
+                    transactionToDeposit.Savings = savings + number;
 
                     SavingsHelper(transactionToDeposit);
                     break;
 
                 case "C":
-                    var checking = listOfTransactions.Last(x => x.Checking > 0);
+
+                    // NEEDS TO DO A CHECK/ INIT with ZERO
+                    var checking = listOfTransactions.Last(x => x.Checking > 0).Checking;
+                    // var checking = listOfTransactions.Last(x => x.Checking >= 0).Checking;
                     number = CheckValueIsPos("deposit into your checking account?");
 
-                    transactionToDeposit.Deposit = number;
-                    transactionToDeposit.Checking = checking.Checking + number;
+                    transactionToDeposit.DepositToChecking = number;
+                    transactionToDeposit.Checking = checking + number;
 
                     CheckingHelper(transactionToDeposit);
                     break;
@@ -112,23 +158,66 @@ namespace FirstBankOfSuncoast
             switch (menuInput)
             {
                 case "S":
+
+                    // NEEDS TO DO A CHECK/ INIT with ZERO
                     var savings = listOfTransactions.Last(x => x.Savings > 0);
+                    // var savings = listOfTransactions.Last(x => x.Savings >= 0);
                     var number = CheckValueIsPos("withdraw from your savings account?");
+                    bool fundsAvailable = false;
 
-                    transactionToWithdraw.Withdrawal = number;
-                    transactionToWithdraw.Savings = savings.Savings - number;
+                    // CAN THIS LOOP BE PUT INTO HELPER FUNCTION? OR DOES SAVINGS/CHECKING DEPENDENCY PREVENT THAT?
+                    while (!fundsAvailable)
+                    {
+                        if (savings.Savings - number >= 0)
+                        {
+                            transactionToWithdraw.WithdrawalFromSavings = number;
+                            transactionToWithdraw.Savings = savings.Savings - number;
+                            SavingsHelper(transactionToWithdraw);
+                            fundsAvailable = true;
+                        }
+                        else
+                        {
+                            Console.WriteLine("You do not have enough funds available for this withdrawal. Please try again.");
+                            // WHY WON'T DIALOGUE REFRESHER WORK HERE??? DialogueRefresher();
+                            Console.WriteLine();
+                            Console.WriteLine("Press any key to continue...");
+                            Console.ReadKey(true).Key.ToString();
+                            Console.Clear();
+                            number = Program.PromptForInt("How much would you like to withdraw from your savings account?");// + endOfSentence);
+                        }
+                    }
 
-                    SavingsHelper(transactionToWithdraw);
                     break;
 
                 case "C":
+
+                    // NEEDS TO DO A CHECK/ INIT with ZERO
                     var checking = listOfTransactions.Last(x => x.Checking > 0);
+                    // var checking = listOfTransactions.Last(x => x.Checking >= 0);
                     number = CheckValueIsPos("withdraw from your checking account?");
+                    fundsAvailable = false;
 
-                    transactionToWithdraw.Withdrawal = number;
-                    transactionToWithdraw.Checking = checking.Checking - number;
+                    while (!fundsAvailable)
+                    {
+                        if (checking.Checking - number >= 0)
+                        {
+                            transactionToWithdraw.WithdrawalFromChecking = number;
+                            transactionToWithdraw.Checking = checking.Checking - number;
+                            CheckingHelper(transactionToWithdraw);
+                            fundsAvailable = true;
+                        }
+                        else
+                        {
+                            Console.WriteLine("You do not have enough funds available for this withdrawal. Please try again.");
+                            // WHY WON'T DIALOGUE REFRESHER WORK HERE??? DialogueRefresher();
+                            Console.WriteLine();
+                            Console.WriteLine("Press any key to continue...");
+                            Console.ReadKey(true).Key.ToString();
+                            Console.Clear();
+                            number = Program.PromptForInt("How much would you like to withdraw from your savings account?");// + endOfSentence);
+                        }
+                    }
 
-                    CheckingHelper(transactionToWithdraw);
                     break;
             }
         }
@@ -136,7 +225,7 @@ namespace FirstBankOfSuncoast
         public void SavingsHelper(Transaction transactionToTransfer)
         {
             listOfTransactions.Add(transactionToTransfer);
-            Console.WriteLine($"Your savings balance is ${listOfTransactions.Last(x => x.Savings > 0).Savings}");
+            Console.WriteLine($"Savings account balance is ${listOfTransactions.Last(x => x.Savings > 0).Savings}.");
             SaveTransactions();
             DialogueRefresher();
         }
@@ -144,7 +233,7 @@ namespace FirstBankOfSuncoast
         public void CheckingHelper(Transaction transactionToTransfer)
         {
             listOfTransactions.Add(transactionToTransfer);
-            Console.WriteLine($"Your checking balance is ${listOfTransactions.Last(x => x.Checking > 0).Checking}");
+            Console.WriteLine($"Checking account balance is ${listOfTransactions.Last(x => x.Checking > 0).Checking}.");
             SaveTransactions();
             DialogueRefresher();
         }
@@ -172,6 +261,29 @@ namespace FirstBankOfSuncoast
             }
             return number;
         }
+
+        // public static int CheckFundsAvailable(Transaction transaction, int number)
+        // {
+        //     bool positive = false;
+        //     while (!positive)
+        //     {
+        //         if (accountt >= 0)
+        //         {
+        //             positive = true;
+        //         }
+        //         else
+        //         {
+        //             Console.WriteLine("This is not a valid number. Please try again");
+        //             // WHY WON'T DIALOGUE REFRESHER WORK HERE??? DialogueRefresher();
+        //             Console.WriteLine();
+        //             Console.WriteLine("Press any key to continue...");
+        //             Console.ReadKey(true).Key.ToString();
+        //             Console.Clear();
+        //             number = Program.PromptForInt("How much would you like to " + endOfSentence);
+        //         }
+        //     }
+        //     return number;
+        // }
 
         public void DialogueRefresher()
         {
