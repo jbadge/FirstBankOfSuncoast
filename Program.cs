@@ -27,6 +27,8 @@ namespace FirstBankOfSuncoast
 
         public static void Menu(TransactionDatabase database)
         {
+            WelcomeMessage();
+
             bool usingMenu = true;
             while (usingMenu)
             {
@@ -132,8 +134,6 @@ namespace FirstBankOfSuncoast
             var listOfTransactions = new List<Transaction>();
             var database = new TransactionDatabase();
             database.LoadTransactions();
-
-            WelcomeMessage();
 
             Menu(database);
         }

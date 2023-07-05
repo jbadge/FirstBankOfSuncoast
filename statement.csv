@@ -1,6 +1,7 @@
-Savings,Checking,Deposit,Withdrawal
-100,200,0,0
-150,0,50,0
-0,250,50,0
-130,0,0,20
-0,230,0,20
+Savings,Checking,DepositToSavings,WithdrawalFromSavings,DepositToChecking,WithdrawalFromChecking
+0,0,0,0,0,0
+100,0,100,0,0,0
+90,0,0,10,0,0
+0,40,0,0,40,0
+90,0,0,0,0,0
+0,40,0,0,0,0
